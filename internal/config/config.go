@@ -1,11 +1,12 @@
 package config
 
 import (
-	"github.com/disturbing/github-app-k8s-secret-refresher/v2/internal/types"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/disturbing/github-app-k8s-secret-refresher/v2/internal/types"
+	"github.com/joho/godotenv"
 )
 
 var (
@@ -14,21 +15,32 @@ var (
 	GithubAppInstallationId int
 	GithubAppPrivateKeyFile string
 
-	KubeConfigPath      string
-	KubeSecretName      string
-	KubeSecretNamespace string
+	KubeConfigPath                       string
+	KubeSecretName                       string
+	KubeSecretAuthUsernameKey            string
+	KubeSecretInstallationAccessTokenKey string
+	KubeSecretNamespace                  string
 )
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
+}
 
 func Load() {
 	godotenv.Load()
 
-	TokenProcessorType = types.TokenProcessorType(os.Getenv("TOKEN_PROCESSOR_TYPE"))
+	TokenProcessorType = types.TokenProcessorType(getEnv("TOKEN_PROCESSOR_TYPE", "KUBERNETES"))
 	GithubAppId = getEnvAsInt("GITHUB_APP_ID")
 	GithubAppInstallationId = getEnvAsInt("GITHUB_APP_INSTALLATION_ID")
 	GithubAppPrivateKeyFile = os.Getenv("GITHUB_APP_PRIVATE_KEY_PATH")
 
 	KubeConfigPath = os.Getenv("KUBE_CONFIG_PATH")
-	KubeSecretName = os.Getenv("KUBE_SECRET_NAME")
+	KubeSecretName = getEnv("KUBE_SECRET_NAME", "github-credentials")
+	KubeSecretAuthUsernameKey = getEnv("KUBE_SECRET_AUTH_USERNAME_KEY", "username")
+	KubeSecretInstallationAccessTokenKey = getEnv("KUBE_SECRET_INSTALLATION_ACCESS_TOKEN_KEY", "password")
 	KubeSecretNamespace = os.Getenv("KUBE_SECRET_NAMESPACE")
 }
 

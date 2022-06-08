@@ -3,6 +3,8 @@ package controller
 import (
 	"context"
 	"flag"
+	"log"
+
 	"github.com/disturbing/github-app-k8s-secret-refresher/v2/internal/config"
 	"github.com/disturbing/github-app-k8s-secret-refresher/v2/internal/types"
 	k8sMeta "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -11,7 +13,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"log"
 )
 
 type kubernetesController struct {
@@ -51,8 +52,8 @@ func (controller *kubernetesController) ProcessNewToken(token string) error {
 				Name: &config.KubeSecretName,
 			},
 			Data: map[string][]byte{
-				"username": []byte(types.GitHubAppAuthUsername),
-				"password": []byte(token),
+				config.KubeSecretAuthUsernameKey:            []byte(types.GitHubAppAuthUsername),
+				config.KubeSecretInstallationAccessTokenKey: []byte(token),
 			},
 		}, k8sMeta.ApplyOptions{
 			TypeMeta: k8sMeta.TypeMeta{
